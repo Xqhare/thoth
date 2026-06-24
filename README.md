@@ -1,12 +1,11 @@
-# $NAME
+# Thoth
 
 TODO:
 
-- Run `bash init.sh`, all needed inputs will be asked for
 - Consider ArgosCI integration
 - Consider needed dependencies in `Cargo.toml`
 
-[Description]
+A custom unicode graphme clusters segmentation implementation.
 
 It follows my "All code written by me or part of rust's standard library and libc" philosophy.
 You can learn more about that [here](https://blog.xqhare.net/posts/why_solve_problems/).
@@ -17,13 +16,13 @@ You can learn more about that [here](https://blog.xqhare.net/posts/why_solve_pro
 
 ## Environment
 
-$NAME expects the environment to provide:
+Thoth expects the environment to provide:
 
 - `ls` UNIX command
 
 ## Roadmap
 
-`$NAME` uses my [nomos](https://github.com/xqhare/nomos) project management system.
+`Thoth` uses my [nomos](https://github.com/xqhare/nomos) project management system.
 
 The roadmap for this project can be found in the [nomos.md](nomos.md) file.
 
@@ -31,10 +30,10 @@ All nomos files follow the syntax defined [here](https://github.com/Xqhare/nomos
 
 ## Naming
 
-As with all my projects, $NAME is named after an ancient deity.
+As with all my projects, Thoth is named after an ancient deity.
 Learn more about my naming scheme [here](https://blog.xqhare.net/posts/explaining_the_pantheon/).
 
-[Deity Description]
+Thoth, is one of the most prominent ancient Egyptian dieties of writing, magic and wisdom. He is credited with inventing hieroglyphics while serving as the scribe of the gods. He was also a divine architect and cosmic lawmaker organising sacred time and space to align with universal balance.
 
 ## Usage
 
@@ -44,7 +43,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-$NAME = { git = "https://github.com/xqhare/$NAME" }
+Thoth = { git = "https://github.com/xqhare/thoth" }
 ```
 
 ### Example
@@ -55,8 +54,8 @@ $NAME = { git = "https://github.com/xqhare/$NAME" }
 
 ## License
 
-$NAME is distributed under the [MIT](https://github.com/xqhare/$NAME/blob/master/LICENSE) license.
+Thoth is distributed under the [MIT](https://github.com/xqhare/thoth/blob/master/LICENSE) license.
 
 ## Contributing
 
-See [CONTRIBUTING](https://github.com/xqhare/$NAME/blob/master/CONTRIBUTING.md) for contribution guidelines.
+See [CONTRIBUTING](https://github.com/xqhare/thoth/blob/master/CONTRIBUTING.md) for contribution guidelines.
