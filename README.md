@@ -43,7 +43,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-Thoth = { git = "https://github.com/xqhare/thoth" }
+thoth = { git = "https://github.com/xqhare/thoth" }
 ```
 
 ### Example
