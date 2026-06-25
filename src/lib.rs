@@ -45,11 +45,6 @@ pub mod utilities {
 }
 
 /// The core grapheme segmentation algorithm
-pub struct Thoth {
-    pub(crate) table: BTreeMap<u32, Value>,
-}
-
-/// Trait for grapheme segmentation.
 ///
 /// Does not support emoji.
 ///
@@ -66,6 +61,10 @@ pub struct Thoth {
 /// It also means that `Thoth` supports neither extended or legacy grapheme clusters.
 ///
 /// `Thoth` is also limited to a single thread and uses a double pass parsing algorithm.
+pub struct Thoth {
+    pub(crate) table: BTreeMap<u32, Value>,
+}
+
 impl Thoth {
     /// Grapheme segmentation of a string into a vector of strings
     ///
@@ -96,7 +95,6 @@ impl Thoth {
     /// Emoji are *not* supported
     pub fn grapheme_segmentation_u8(input: &[u8]) -> ThothResult<Vec<String>> {
         let thoth = Self::new()?;
-        // TODO: Move from a double pass to a single pass
         let stream = new_utf_stream(input)?;
         Ok(grapheme_segmentation_utf8_stream(stream, &thoth.table))
     }

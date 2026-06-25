@@ -1,11 +1,15 @@
 # Thoth
 
-TODO:
+A custom unicode graphme clusters segmentation implementation without emoji support.
 
-- Consider ArgosCI integration
-- Consider needed dependencies in `Cargo.toml`
-
-A custom unicode graphme clusters segmentation implementation.
+> [!important]
+> Ignores rules `GB9c` through to `GB13` of the `Grapheme Cluster Boundary Rules`. 
+> This is done for simplicity.
+> 
+> However, this also means that emoji (including country flags), along with 'not breaking within certain combinations with Indic_Conjunct_Break' of extended clusters are *not* supported.
+> 
+> This means that `Thoth` is not a true unicode grapheme segmentation algorithm.
+> It also means that `Thoth` supports neither extended or legacy grapheme clusters.
 
 It follows my "All code written by me or part of rust's standard library and libc" philosophy.
 You can learn more about that [here](https://blog.xqhare.net/posts/why_solve_problems/).
@@ -13,12 +17,6 @@ You can learn more about that [here](https://blog.xqhare.net/posts/why_solve_pro
 ## Features
 
 - _**No dependencies**_: All code is written by me or part of std.
-
-## Environment
-
-Thoth expects the environment to provide:
-
-- `ls` UNIX command
 
 ## Roadmap
 
@@ -35,6 +33,10 @@ Learn more about my naming scheme [here](https://blog.xqhare.net/posts/explainin
 
 Thoth, is one of the most prominent ancient Egyptian dieties of writing, magic and wisdom. He is credited with inventing hieroglyphics while serving as the scribe of the gods. He was also a divine architect and cosmic lawmaker organising sacred time and space to align with universal balance.
 
+## Contained `bin`
+
+- `pre_generator`: Generates the `GraphemeBreakProperty.txt` file used by the `thoth` crate. Only needed for development, not general usage.
+
 ## Usage
 
 ### Importing
@@ -48,8 +50,18 @@ thoth = { git = "https://github.com/xqhare/thoth" }
 
 ### Example
 
-```rust
+While `Thoth` can error, this is mainly caused by invalid Unicode characters or byte sequences.
 
+```rust
+use thoth::Thoth;
+
+fn main() {
+    let text = "Hello World!";
+    assert_eq!(
+        Thoth::grapheme_segmentation(text).unwrap(),
+        vec!["H", "e", "l", "l", "o", " ", "W", "o", "r", "l", "d", "!"]
+    );
+}
 ```
 
 ## License
