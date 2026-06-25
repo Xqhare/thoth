@@ -6,14 +6,15 @@ pub type ThothResult<T> = Result<T, NemesisError>;
 
 #[derive(Debug)]
 pub enum ThothError {
-    Generic(String),
+    TableParsing(String),
+    InvalidUtf8(String),
     Io(std::io::Error),
 }
 
 impl fmt::Display for ThothError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ThothError::Generic(msg) => write!(f, "{}", msg),
+            ThothError::TableParsing(msg) | ThothError::InvalidUtf8(msg) => write!(f, "{}", msg),
             ThothError::Io(err) => write!(f, "{}", err),
         }
     }
@@ -22,7 +23,7 @@ impl fmt::Display for ThothError {
 impl std::error::Error for ThothError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
-            ThothError::Generic(_) => None,
+            ThothError::TableParsing(_) | ThothError::InvalidUtf8(_) => None,
             ThothError::Io(err) => Some(err),
         }
     }
