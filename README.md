@@ -8,8 +8,8 @@ A custom unicode graphme clusters segmentation implementation without emoji supp
 > 
 > However, this also means that emoji (including country flags), along with 'not breaking within certain combinations with Indic_Conjunct_Break' of extended clusters are *not* supported.
 > 
-> This means that `Thoth` is not a true unicode grapheme segmentation algorithm.
-> It also means that `Thoth` supports neither extended or legacy grapheme clusters.
+> This means that `Thoth` is not a true Unicode grapheme segmentation algorithm.
+> It also means that neither extended nor legacy grapheme clusters are truly supported by `Thoth` according to the Unicode specification.
 
 It follows my "All code written by me or part of rust's standard library and libc" philosophy.
 You can learn more about that [here](https://blog.xqhare.net/posts/why_solve_problems/).
@@ -17,6 +17,7 @@ You can learn more about that [here](https://blog.xqhare.net/posts/why_solve_pro
 ## Features
 
 - _**No dependencies**_: All code is written by me or part of std.
+- Segments text into grapheme clusters.
 
 ## Roadmap
 
