@@ -5,3 +5,4 @@
 - [ ] Add support for `GB9c` :: Do not break within certain combinations with Indic_Conjunct_Break (InCB)=Linker.
 - [ ] Rework parser :: From the current double pass to a single pass.
 - [ ] Rework return value :: To a vec of small strings dep=software_ideas:"Small String"
+- [ ] (A) Failing Segmentation :: added test to segment (\` + m) [cant write it as nomos will crash because it depends on thoth]; returns len == 3 instead of 1
