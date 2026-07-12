@@ -9,6 +9,14 @@ fn hello_world() {
 }
 
 #[test]
+fn first_bug_found_in_wild() {
+    let text = "m̀";
+    let thot = Thoth::grapheme_segmentation(text).unwrap();
+    let unicode = text.graphemes(true).collect::<Vec<_>>();
+    assert_eq!(thot, unicode);
+}
+
+#[test]
 fn compare() {
     let text = format!(
         "{}{}{}{}{}{}",
