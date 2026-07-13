@@ -11,9 +11,7 @@ fn hello_world() {
 #[test]
 fn first_bug_found_in_wild() {
     let text = "m̀";
-    let thot = Thoth::grapheme_segmentation(text).unwrap();
-    let unicode = text.graphemes(true).collect::<Vec<_>>();
-    assert_eq!(thot, unicode);
+    compare_test(text);
 }
 
 #[test]
@@ -27,34 +25,52 @@ fn compare() {
         include_str!("../Cargo.lock"),
         include_str!("../.gitignore")
     );
-    let thot = Thoth::grapheme_segmentation(&text).unwrap();
-    let unicode = text.graphemes(true).collect::<Vec<_>>();
-    assert_eq!(thot, unicode);
+    compare_test(&text);
 }
 
-/// Doesn't panic, but returns a vector of length 3 instead of the correct 1
+/// Compare graphemes with the unicode segmentation crate
+fn compare_test(text: &str) {
+    let graphemes = Thoth::grapheme_segmentation(text).unwrap();
+    let unicode = text.graphemes(true).collect::<Vec<_>>();
+    assert_eq!(graphemes, unicode);
+}
+
+// Emojis with variation selectors; Fails as emoji are not officially supported
+#[should_panic]
+#[test]
+fn advanced_emoji() {
+    let emoji = "🖖🏿";
+    compare_test(emoji);
+    // Starts failing here
+    let emoji = "🤸🏾‍♂️";
+    compare_test(emoji);
+    let emoji = "🕵🏿‍♂️";
+    compare_test(emoji);
+    let emoji = "👨🏾‍🚀";
+    compare_test(emoji);
+    let emoji = "🐦‍⬛";
+    compare_test(emoji);
+    let emoji = "👩🏻‍🦱";
+    compare_test(emoji);
+}
+
+/// Verify that emojis with variation selectors are correctly segmented (should be 1 grapheme)
 #[test]
 fn no_emoji() {
     let emoji = "❤️";
-    let graphemes = Thoth::grapheme_segmentation(emoji).unwrap();
-    assert_ne!(graphemes.len(), 1);
-    assert_eq!(graphemes.len(), 3);
+    compare_test(emoji);
 }
 
-/// Panics with `attempt to subtract with overflow`
+/// Verify that single emoji characters do not cause subtraction underflow and segment correctly
 #[test]
-#[should_panic]
 fn no_emoji2() {
     let emoji = "🦀";
-    let graphemes = Thoth::grapheme_segmentation(emoji).unwrap();
-    assert_ne!(graphemes.len(), 1);
+    compare_test(emoji);
 }
 
-/// Panics with `attempt to subtract with overflow`
+/// Verify that other emoji characters do not cause subtraction underflow and segment correctly
 #[test]
-#[should_panic]
 fn no_emoji3() {
     let emoji = "✅";
-    let graphemes = Thoth::grapheme_segmentation(emoji).unwrap();
-    assert_ne!(graphemes.len(), 1);
+    compare_test(emoji);
 }

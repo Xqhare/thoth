@@ -2,161 +2,85 @@ use std::collections::BTreeMap;
 
 use crate::value::Value;
 
+/// Grapheme segmentation of a UTF-8 stream using Unicode 17.0.0 boundary rules.
 pub fn grapheme_segmentation_utf8_stream(
     input: Vec<(u32, &[u8])>,
     table: &BTreeMap<u32, Value>,
 ) -> Vec<String> {
+    if input.is_empty() {
+        return Vec::new();
+    }
     let mut output = Vec::new();
-    let mut buffer = String::new();
-    let mut index = 0;
+    let mut current_grapheme = String::new();
+    current_grapheme.push_str(std::str::from_utf8(input[0].1).unwrap());
 
-    while index < input.len() {
-        if output.len() == 2 {
-            // TODO: This is a hack
-            if output[0] == String::new() {
-                output.remove(0);
-            }
+    for i in 1..input.len() {
+        if insert_break(input[i - 1], input[i], table) {
+            output.push(current_grapheme.clone());
+            current_grapheme.clear();
         }
-        if input.len() == index + 1 {
-            if insert_break(input[index - 1], input[index], table) {
-                output.push(buffer.clone());
-                buffer.clear();
-            }
-            buffer.push_str(std::str::from_utf8(input[index].1).unwrap());
-            output.push(buffer.clone());
-            buffer.clear();
-            break;
-        } else if insert_break(input[index], input[index + 1], table) {
-            output.push(buffer.clone());
-            buffer.clear();
-        }
-        buffer.push_str(std::str::from_utf8(input[index].1).unwrap());
-        index += 1;
+        current_grapheme.push_str(std::str::from_utf8(input[i].1).unwrap());
     }
-    if !buffer.is_empty() {
-        output.push(buffer.clone());
-    }
+    output.push(current_grapheme);
     output
 }
 
 fn insert_break(current: (u32, &[u8]), next: (u32, &[u8]), table: &BTreeMap<u32, Value>) -> bool {
-    if gb3_to_5(current, next, table) {
-        true
-    } else if gb6_to_8(current, next, table) {
-        true
-    } else if gb9(next, table) {
-        true
-    } else if gb9a_b(current, next, table) {
-        true
-    } else if gb999() {
-        true
-    } else {
-        unreachable!("Unreachable thanks to gb999");
-    }
-}
+    let current_val = table.get(&current.0);
+    let next_val = table.get(&next.0);
 
-/// Do not break between a CR and LF. Otherwise, break before and after controls.
-///
-/// Returns `true` if a break should be inserted, `false` otherwise
-fn gb3_to_5(current: (u32, &[u8]), next: (u32, &[u8]), table: &BTreeMap<u32, Value>) -> bool {
-    if let Some(val) = table.get(&current.0) {
-        if val == &Value::Cr {
-            if let Some(nval) = table.get(&next.0) {
-                if nval == &Value::Lf {
-                    return false;
-                }
-            }
-            return true;
-        }
+    // GB3: CR x LF
+    if current_val == Some(&Value::Cr) && next_val == Some(&Value::Lf) {
+        return false;
     }
-    false
-}
-
-/// Do not break Hangul syllable or other conjoining sequences.
-fn gb6_to_8(current: (u32, &[u8]), next: (u32, &[u8]), table: &BTreeMap<u32, Value>) -> bool {
-    if gb6(current, next, table) {
-        true
-    } else if gb7(current, next, table) {
-        true
-    } else if gb8(current, next, table) {
-        true
-    } else {
-        false
+    // GB4: (Control | CR | LF) ÷
+    if current_val == Some(&Value::Cr)
+        || current_val == Some(&Value::Lf)
+        || current_val == Some(&Value::Control)
+    {
+        return true;
     }
-}
-
-/// Do not break before extending characters or ZWJ.
-fn gb9(next: (u32, &[u8]), table: &BTreeMap<u32, Value>) -> bool {
-    if let Some(val) = table.get(&next.0) {
-        if val == &Value::ZWJ || val == &Value::Extend {
-            return false;
-        }
+    // GB5: ÷ (Control | CR | LF)
+    if next_val == Some(&Value::Cr)
+        || next_val == Some(&Value::Lf)
+        || next_val == Some(&Value::Control)
+    {
+        return true;
     }
+    // GB6: L x (L | V | LV | LVT)
+    if current_val == Some(&Value::L)
+        && (next_val == Some(&Value::L)
+            || next_val == Some(&Value::V)
+            || next_val == Some(&Value::LV)
+            || next_val == Some(&Value::LVT))
+    {
+        return false;
+    }
+    // GB7: (LV | V) x (V | T)
+    if (current_val == Some(&Value::LV) || current_val == Some(&Value::V))
+        && (next_val == Some(&Value::V) || next_val == Some(&Value::T))
+    {
+        return false;
+    }
+    // GB8: (LVT | T) x T
+    if (current_val == Some(&Value::LVT) || current_val == Some(&Value::T))
+        && next_val == Some(&Value::T)
+    {
+        return false;
+    }
+    // GB9: x (Extend | ZWJ)
+    if next_val == Some(&Value::Extend) || next_val == Some(&Value::ZWJ) {
+        return false;
+    }
+    // GB9a: x SpacingMark
+    if next_val == Some(&Value::SpaceingMark) {
+        return false;
+    }
+    // GB9b: Prepend x
+    if current_val == Some(&Value::Prepend) {
+        return false;
+    }
+    // GB999: Otherwise, break.
     true
 }
 
-/// Do not break before SpacingMarks, or after Prepend characters.
-fn gb9a_b(current: (u32, &[u8]), next: (u32, &[u8]), table: &BTreeMap<u32, Value>) -> bool {
-    if let Some(val) = table.get(&next.0) {
-        if val == &Value::SpaceingMark {
-            return false;
-        }
-    }
-    if let Some(val) = table.get(&current.0) {
-        if val == &Value::Prepend {
-            return false;
-        }
-    }
-    true
-}
-
-/// Otherwise, break everywhere.
-fn gb999() -> bool {
-    true
-}
-
-fn gb8(current: (u32, &[u8]), next: (u32, &[u8]), table: &BTreeMap<u32, Value>) -> bool {
-    if let Some(val) = table.get(&current.0) {
-        if val == &Value::LVT || val == &Value::T {
-            if let Some(nval) = table.get(&next.0) {
-                if nval == &Value::T {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-    false
-}
-
-fn gb7(current: (u32, &[u8]), next: (u32, &[u8]), table: &BTreeMap<u32, Value>) -> bool {
-    if let Some(val) = table.get(&current.0) {
-        if val == &Value::LV || val == &Value::V {
-            if let Some(nval) = table.get(&next.0) {
-                if nval == &Value::L || nval == &Value::V {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-    false
-}
-
-fn gb6(current: (u32, &[u8]), next: (u32, &[u8]), table: &BTreeMap<u32, Value>) -> bool {
-    if let Some(val) = table.get(&current.0) {
-        if val == &Value::L {
-            if let Some(nval) = table.get(&next.0) {
-                if nval == &Value::L
-                    || nval == &Value::V
-                    || nval == &Value::LV
-                    || nval == &Value::LVT
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-    false
-}
