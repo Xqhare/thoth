@@ -57,9 +57,10 @@ While `Thoth` can error, this is mainly caused by invalid Unicode characters or 
 use thoth::Thoth;
 
 fn main() {
+    let thoth = Thoth::new().unwrap();
     let text = "Hello World!";
     assert_eq!(
-        Thoth::grapheme_segmentation(text).unwrap(),
+        thoth.segment(text).unwrap(),
         vec!["H", "e", "l", "l", "o", " ", "W", "o", "r", "l", "d", "!"]
     );
 }

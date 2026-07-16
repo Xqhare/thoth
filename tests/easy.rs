@@ -74,3 +74,12 @@ fn no_emoji3() {
     let emoji = "✅";
     compare_test(emoji);
 }
+
+#[test]
+fn test_instance_segmenter() {
+    let thoth = Thoth::new().unwrap();
+    assert_eq!(
+        thoth.segment("Hello").unwrap(),
+        vec!["H", "e", "l", "l", "o"]
+    );
+}

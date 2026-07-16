@@ -66,6 +66,44 @@ pub struct Thoth {
 }
 
 impl Thoth {
+    /// Create a new `Thoth` instance.
+    ///
+    /// # Errors
+    /// Returns a `ThothError` if parsing/initialization fails.
+    #[inline]
+    pub fn new() -> ThothResult<Thoth> {
+        let table: BTreeMap<u32, Value> = table()?;
+        Ok(Thoth { table })
+    }
+    /// Grapheme segmentation of a string into a vector of strings using this instance.
+    ///
+    /// # Arguments
+    /// * `text` - The string to segment
+    ///
+    /// # Returns
+    /// A vector of strings. Each string is a single grapheme cluster.
+    ///
+    /// # Errors
+    /// Returns a `ThothError` if parsing/initialization fails.
+    #[inline]
+    pub fn segment(&self, text: &str) -> ThothResult<Vec<String>> {
+        self.segment_u8(text.as_bytes())
+    }
+    /// Grapheme segmentation of a byte array into a vector of strings using this instance.
+    ///
+    /// # Arguments
+    /// * `input` - The byte array to segment
+    ///
+    /// # Returns
+    /// A vector of strings. Each string is a single grapheme cluster.
+    ///
+    /// # Errors
+    /// Returns a `ThothError` if parsing/initialization fails.
+    #[inline]
+    pub fn segment_u8(&self, input: &[u8]) -> ThothResult<Vec<String>> {
+        let stream = new_utf_stream(input)?;
+        Ok(grapheme_segmentation_utf8_stream(stream, &self.table))
+    }
     /// Grapheme segmentation of a string into a vector of strings
     ///
     /// # Arguments
@@ -74,11 +112,15 @@ impl Thoth {
     /// # Returns
     /// A vector of strings. Each string is a single grapheme cluster
     ///
+    /// # Errors
+    /// Returns a `ThothError` if parsing/initialization fails.
+    ///
     /// # Notes
     /// Emoji are *not* supported
     ///
     /// This function is a wrapper for `Thoth::grapheme_segmentation_u8`.
     /// If you read the text from a file, or have otherwise access to a `&[u8]`, then you should use `Thoth::grapheme_segmentation_u8` directly for better performance.
+    #[inline]
     pub fn grapheme_segmentation(text: &str) -> ThothResult<Vec<String>> {
         // Don't think this is the most performant, but its simple
         Self::grapheme_segmentation_u8(text.as_bytes())
@@ -86,20 +128,19 @@ impl Thoth {
     /// Grapheme segmentation of a byte array into a vector of strings
     ///
     /// # Arguments
-    /// * `text` - The byte array to segment
+    /// * `input` - The byte array to segment
     ///
     /// # Returns
     /// A vector of strings. Each string is a single grapheme cluster
     ///
+    /// # Errors
+    /// Returns a `ThothError` if parsing/initialization fails.
+    ///
     /// # Notes
     /// Emoji are *not* supported
+    #[inline]
     pub fn grapheme_segmentation_u8(input: &[u8]) -> ThothResult<Vec<String>> {
         let thoth = Self::new()?;
-        let stream = new_utf_stream(input)?;
-        Ok(grapheme_segmentation_utf8_stream(stream, &thoth.table))
-    }
-    fn new() -> ThothResult<Thoth> {
-        let table: BTreeMap<u32, Value> = table()?;
-        Ok(Thoth { table })
+        thoth.segment_u8(input)
     }
 }
