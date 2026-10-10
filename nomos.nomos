@@ -4,3 +4,4 @@
 - [ ] Rework parser :: From the current double pass to a single pass.
 - [ ] Rework return value :: To a vec of small strings dep=software_ideas:"Small String"
 - [ ] (1) Failing Segmentation :: added test to segment (\` + m) [cant write it as nomos will crash because it depends on thoth]; returns len == 3 instead of 1
+- [ ] (1) Horrible Performance :: While refactoring Ilmarinen, switching from `UnicodeSegmentation` to `Thoth` lead to a slowdown of 13x => 10s -> 130s
